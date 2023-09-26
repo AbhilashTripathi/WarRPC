@@ -30,7 +30,7 @@ class BattlefieldSimulation:
         
         self.current_time = 0  # Current iteration
     
-    def initialize_soldiers(self):
+    '''def initialize_soldiers(self):
         for i in range(self.M):
             x = random.randint(0, self.N - 1)
             y = random.randint(0, self.N - 1)
@@ -44,22 +44,73 @@ class BattlefieldSimulation:
                 'is_commander': False
             }
             self.soldiers.append(soldier)
-            self.grid[y][x] = i + 1
+            self.grid[y][x] = i + 1'''
 
+    def initialize_soldiers(self):
+        occupied_positions = set()  # Create a set to store occupied positions
+        generated_soldiers = 0  # Keep track of the number of generated soldiers
+    
+        while generated_soldiers < self.M:
+            # Generate unique random positions
+            while True:
+                x = random.randint(0, self.N - 1)
+                y = random.randint(0, self.N - 1)
+                position = (x, y)
+    
+                # Check if the position is already occupied
+                if position not in occupied_positions:
+                    break  # Position is unique, exit the loop
+                
+            speed = random.randint(0, self.Si)
+            soldier = {
+                'id': generated_soldiers + 1,
+                'x': x,
+                'y': y,
+                'speed': speed,
+                'status': 'Alive',
+                'is_commander': False
+            }
+            self.soldiers.append(soldier)
+            self.grid[y][x] = generated_soldiers + 1
+    
+            # Add the occupied position to the set
+            occupied_positions.add(position)
+            generated_soldiers += 1  # Increment the count of generated soldiers
+    
         #print(self.soldiers)
-        
+            
         self.commander = random.choice(self.soldiers)
         self.commander['is_commander'] = True
         #print(self.commander)
+    
+        print(self.soldiers)       #this updated list will have 1 commmander in it
 
-        #print(self.soldiers)       #this updated list will have 1 commmander in it
+    def update_commander(self):
+        # Check if the current commander is alive
+        if self.commander['status'] == 'Alive':
+            return  # Commander is still alive, no need to update
+
+        # Find all alive soldiers who are not the current commander
+        #alive_soldiers = [soldier for soldier in self.soldiers if soldier['status'] == 'Alive' and not soldier.get('is_commander')]
+        alive_soldiers = []
+        for soldier in self.soldiers:
+            if soldier['status'] == 'Alive': #and not soldier.get('is_commander'):
+                alive_soldiers.append(soldier)
+
+        if alive_soldiers:
+            # Choose a random soldier from the alive soldiers to be the new commander
+            new_commander = random.choice(alive_soldiers)
+            new_commander['is_commander'] = True
+            self.commander = new_commander
+            print(f"New commander is {new_commander}")
+        
         
     def missile_approaching(self, position, time, missile_type):
         x, y = position     #this is the current_missile position
-        print(f"Missile ({missile_type}) approaching at ({x}, {y}) at time {time}")
+        print(f"Missile ({missile_type}) approaching at ({y}, {x}) at time {time}")
         for soldier in self.soldiers:
             if soldier['status'] == 'Alive':
-                self.take_shelter(soldier, position)
+                self.take_shelter(soldier, position, missile_type)
     
     def status(self, soldier_id):
         soldier = next((s for s in self.soldiers if s['id'] == soldier_id), None)
@@ -130,7 +181,7 @@ class BattlefieldSimulation:
         self.was_hit(soldier_id, is_hit)
 '''
 
-    def calculate_impact_area(missile_type, missile_position):
+    def calculate_impact_area(self, missile_position, missile_type):
         # Initialize the impact area with the center coordinate (x, y)
         x, y = missile_position
         impact_area = [missile_position]
@@ -155,7 +206,7 @@ class BattlefieldSimulation:
 
         return impact_area
     
-    def calculate_valid_neighbors(soldier):
+    def calculate_valid_neighbours(self, soldier):
         # Define the maximum offset based on the soldier's speed
         max_offset = soldier['speed']
 
@@ -172,45 +223,59 @@ class BattlefieldSimulation:
                 # Check if the neighbor is within the grid boundaries
                 if 0 <= neighbor_x < N and 0 <= neighbor_y < N:
                     valid_neighbors.append((neighbor_x, neighbor_y))
+        return valid_neighbors
 
     def take_shelter(self, soldier, missile_position, missile_type):
+        x, y = soldier['x'], soldier['y']
+        mx, my = missile_position
         is_hit = False
+        
         #calculate impact coordinates
-        impact_areas = self.calculate_impact_area(missile_type, missile_position)
+        impact_areas = self.calculate_impact_area((mx, my), missile_type)
         soldier_possible_coords = self.calculate_valid_neighbours(soldier)
-        for soldier_possible_coord in soldier_possible_coords:
-            if((soldier['x'], soldier['y']) not in impact_areas):
-                is_hit = False
-            elif(soldier_possible_coord not in impact_areas):
-                soldier['x'] = soldier_possible_coord[0]
-                soldier['y'] = soldier_possible_coord[1]
-            else:
-                is_hit = True
 
-        #call was_hit() to update the status of thesoldier
+        #if soldier is outside impact zone, he's safe
+        if((x, y) not in impact_areas):
+                is_hit = False
+        else:
+            new_x = x
+            new_y = y
+            for soldier_possible_coord in soldier_possible_coords:
+                if(soldier_possible_coord not in impact_areas):
+                    new_x = soldier_possible_coord[0]
+                    new_y = soldier_possible_coord[1]
+                    is_hit = False
+                    break
+                else:
+                    is_hit = True
+
+            self.grid[y][x] = 0  # Clear old position
+            self.grid[new_y][new_x] = soldier['id']  # Update grid
+            soldier['x'], soldier['y'] = new_x, new_y
+
+        #call was_hit() to update the status of the soldier
         soldier_id = soldier['id']
         self.was_hit(soldier_id, is_hit)
-
-    #def update_commander(soldier, self.commander):
-
-
     
-    def print_layout(self):
+    def print_layout(self, impact_area_coords):
         print(f"Time: {self.current_time}")
         
         # Print grid layout
-        for row in self.grid:
+        for y, row in enumerate(self.grid):
             row_str = ''
-            for cell in row:
+            for x, cell in enumerate(row):
                 if cell == 0:
-                    row_str += '.  '  # Empty cell
+                    if (x, y) in impact_area_coords:
+                        row_str += 'x\t'  # Red dot for impact area
+                    else:
+                        row_str += '.\t'  # Empty cell
                 else:
-                    row_str += f'{cell}  '  # Soldier
+                    row_str += f'{cell}\t'  # Soldier
             print(row_str)
         
         
         # Print soldier status
-        soldier = self.status_all()
+        #soldier = self.status_all()
         for soldier in self.soldiers:
             print(f"Soldier {soldier['id']} - Status: {soldier['status']}")
         
@@ -220,13 +285,19 @@ class BattlefieldSimulation:
             missile_type = random.choice(self.T)
             missile_x = random.randint(0, self.N - 1)
             missile_y = random.randint(0, self.N - 1)
+
+            #impact_area_coords = self.calculate_impact_area((missile_x, missile_y), missile_type)
+            #self.print_layout(impact_area_coords)
+            
             self.missile_approaching((missile_x, missile_y), self.current_time, missile_type)
             
             # Check status after missile impact
             #statuses = self.status_all()
             #print(statuses)
+
+            impact_area_coords = self.calculate_impact_area((missile_x, missile_y), missile_type)
             
-            self.print_layout()
+            self.print_layout(impact_area_coords)
 
             self.update_commander()
             
@@ -239,9 +310,9 @@ class BattlefieldSimulation:
             print("Battle won.")
 
 # Define hyperparameters
-N = 30  # Grid size
-M = 10  # Number of soldiers
-t = 20  # Number of iterations (duration of battle)
+N = 10  # Grid size
+M = 16  # Number of soldiers
+t = 10  # Number of iterations (duration of battle)
 T = ['M1', 'M2', 'M3', 'M4']  # Types of missiles (impact radii)
 Si = 4  # Initial soldier speed range
 
