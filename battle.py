@@ -119,7 +119,14 @@ class BattlefieldSimulation:
         else:
             return None
     
-    def status_all(self):
+    def status_all(self, soldiers):
+        for soldier in self.soldiers:
+            if soldier['status'] == 'Hit' or soldier['status'] == 'Deceased':
+                soldier['status'] = 'Deceased'
+                self.grid[soldier['y']][soldier['x']] = 0
+            else:
+                soldier['status'] = 'Alive'
+                    
         statuses = {}
         for soldier in self.soldiers:
             statuses[soldier['id']] = soldier['status']
@@ -241,7 +248,7 @@ class BattlefieldSimulation:
             new_x = x
             new_y = y
             for soldier_possible_coord in soldier_possible_coords:
-                if(soldier_possible_coord not in impact_areas):
+                if(soldier_possible_coord not in impact_areas and (self.grid[soldier_possible_coord[1]][soldier_possible_coord[0]] == 0)):
                     new_x = soldier_possible_coord[0]
                     new_y = soldier_possible_coord[1]
                     is_hit = False
@@ -298,6 +305,8 @@ class BattlefieldSimulation:
             impact_area_coords = self.calculate_impact_area((missile_x, missile_y), missile_type)
             
             self.print_layout(impact_area_coords)
+
+            print(self.status_all(self.soldiers))
 
             self.update_commander()
             
