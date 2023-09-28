@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+service Defender{
+  // Notify the soldiers about an approaching missile.
+  rpc MissileApproaching(MissileNotification) returns (TrackingDetails);
+
+  // Query soldier details to keep track of .
+  rpc InitializeSoldiers(InitReq) returns (InitDetails);
+}
+
+message InitReq {
+    int32 N = 1;
+    int32 T = 2;
+}
+
+message MissileNotification {
+  int32 t = 1; // Duration after which the next missile will be launched 
+  string missile_type = 2; // M1, M2, M3 and M4
+  int32 x = 3; 
+  int32 y = 4;
+}
+
+message TrackingDetails {
+	int32 casualty_count = 1; // Number of soldiers Hit till the current iteration
+	int32 soldier_count = 2; // Total number of soldiers on the defender side
+}
+
+message SoldierDetail {
+	int32 id = 1; // Unique ID of the soldier
+	int32 x = 2; 
+	int32 y = 3;
+	int32 speed = 4; // Speeds: 0, 1, 2, 3, 4
+	string status = 5; // Alive, Hit, Deceased
+	bool is_commander = 6; // Check if the soldier is commander or not
+}
+
+message InitDetails {
+	repeated SoldierDetail sol_details = 1; // Contains all soldier details
+}
