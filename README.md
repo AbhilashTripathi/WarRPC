@@ -19,10 +19,13 @@ Step 3: Activate the virtual environment using below command
  
 ii. To run the code
 
-Step 1: In command line navigate to the folder (WarRPC) and then run below commands
+
+Step 1: Get all the files on your local environment using the below given command:
+	 git clone https://github.com/AbhilashTripathi/WarRPC.git 
+Step 2: In command line navigate to the folder (WarRPC) and then run below commands
 	python defender.py
 	python attacker.py
-Step 2: Give user inputs as required
+Step 3: Give user inputs as required
 
 
 Generated Output is in output_defender.log and output_attacker.log
