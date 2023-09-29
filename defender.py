@@ -4,98 +4,57 @@ import battle_pb2_grpc
 import grpc
 from concurrent import futures
 
-
 class Defender(battle_pb2_grpc.DefenderServicer):
-    soldiers = []
-    grid = []
-    #commander = {}
+
     def InitializeSoldiers(self, request, context):
         self.N = request.N
         self.T = request.T
+        self.M = 0  # Initialize the number of soldiers
 
-        soldier_details = Defender.initialize_soldiers(self)
+        soldier_details = self.initialize_soldiers()
         return battle_pb2.InitDetails(sol_details=soldier_details)
 
     def MissileApproaching(self, request, context):
         self.t = request.t
-        self.missile_types = request.missile_type
+        self.missile_type = request.missile_type
         self.x = request.x
         self.y = request.y
-        defender = Defender(self.N, self.M, self.T, self.t, self.missile_types, self.speed, self.casualty_count)
-        defender.simulate_battle()
-        return battle_pb2.TrackingDetails(casualty_count=self.casualty_count, soldier_count=len(Defender.soldiers))
 
-    def __init__(self, N, M, T, t, missile_types, speed, casualty_count):
+        # Simulate the battle and take casuality count as return
+        self.simulate_battle((self.x, self.y), self.missile_type)
+
+        #return battle_pb2.TrackingDetails(casualty_count=self.casualty_count, soldier_count=len(Defender.soldiers))
+        return battle_pb2.TrackingDetails(casualty_count=self.casualty_count, soldier_count=len(self.soldiers))
+    
+    def __init__(self, N, T):
         self.N = N  # Grid size
-        self.M = M  # Number of soldiers
-        self.T = T  # Total duration battle
-        self.t = 0  # Duration after which the attacker launches new missile
-        self.missile_types = []  # Types of missiles (impact radii)
-        self.casualty_count = 0
+        self.T = T  # Number of iterations (duration of battle)
+        self.t = 0  # Duration after which the attacker launches a new missile
+        self.missile_types = ['M1', 'M2', 'M3', 'M4']  # Types of missiles (impact radii)
+        self.speed = 0  # Initial soldier speed range
+        self.casualty_count = 0  # Initialize casualty count
 
-        self.speed = speed  # Initial soldier speed range
-        
-        #self.grid = [[0 for _ in range(self.N)] for _ in range(self.N)]  # Grid to represent soldiers
+        self.grid = []
         # Initialize an empty grid (matrix) with self.N rows and self.N columns.
-        #self.grid = []
-
-        # Create self.N rows.
         for _ in range(self.N):
-            # Create a row (list) to store the elements in this row.
-            row = []
-            # Create self.N columns in the current row and set them to 0.
-            for _ in range(self.N):
-                row.append(0)
-            # Append the row to the grid.
-            Defender.grid.append(row)
+            row = [0] * self.N
+            #Defender.grid.append(row)
+            self.grid.append(row)
 
-        #print(self.grid)
-            
         self.soldiers = []  # List to store soldier objects
-        
-        self.current_time = 0  # Current iteration
-
-    def __init__(self, N, M, T, t, missile_types, speed, casualty_count):
-        self.N = N  # Grid size
-        self.M = M  # Number of soldiers
-        self.T = T  # Total duration battle
-        self.t = t  # Duration after which the attacker launches new missile
-        self.missile_types = missile_types  # Types of missiles (impact radii)
-        self.casualty_count = casualty_count
-
-        self.speed = speed  # Initial soldier speed range
-        
-        #self.grid = [[0 for _ in range(self.N)] for _ in range(self.N)]  # Grid to represent soldiers
-        # Initialize an empty grid (matrix) with self.N rows and self.N columns.
-        #self.grid = []
-
-        # Create self.N rows.
-        for _ in range(self.N):
-            # Create a row (list) to store the elements in this row.
-            row = []
-            # Create self.N columns in the current row and set them to 0.
-            for _ in range(self.N):
-                row.append(0)
-            # Append the row to the grid.
-            Defender.grid.append(row)
-
-        #print(self.grid)
-            
-        #self.soldiers = []  # List to store soldier objects
-        self.commander = {} # Current commander
-        
+        self.commander = {}  # Current commander
         self.current_time = 0  # Current iteration
 
     def initialize_soldiers(self):
         occupied_positions = set()  # Create a set to store occupied positions
         generated_soldiers = 0  # Keep track of the number of generated soldiers
-        
+
         while True:
-            M = int(input(f"Enter number of soldiers on the defender side: (It has to less than {self.N * self.N}): "))
-            if(self.N * self.N >= M):
+            self.M = int(input(f"Enter the number of soldiers on the defender side (<= {self.N * self.N}): "))
+            if self.M <= self.N * self.N:
                 break
 
-        while generated_soldiers < M:
+        while generated_soldiers < self.M:
             # Generate unique random positions
             while True:
                 x = random.randint(0, self.N - 1)
@@ -105,41 +64,43 @@ class Defender(battle_pb2_grpc.DefenderServicer):
                 # Check if the position is already occupied
                 if position not in occupied_positions:
                     break  # Position is unique, exit the loop
-                
-            #speed = random.randint(0, Defender.soldier['Si'])
+
             soldier = {
                 'id': generated_soldiers + 1,
                 'x': x,
                 'y': y,
                 'status': 'Alive',
                 'is_commander': False,
-                'speed': random.randint(0, 4)
+                'speed': random.randint(0, 4)  # Set random soldier speed
             }
-            Defender.soldiers.append(soldier)
-            
-            for _ in range(self.N):
-                # Create a row (list) to store the elements in this row.
-                row = []
-                # Create self.N columns in the current row and set them to 0.
-                for _ in range(self.N):
-                    row.append(0)
-                # Append the row to the grid.
-                Defender.grid.append(row)
-
-            Defender.grid[y][x] = generated_soldiers + 1
+            #Defender.soldiers.append(soldier)
+            self.soldiers.append(soldier)
+            #Defender.grid[y][x] = generated_soldiers + 1  # Update grid
+            self.grid[y][x] = generated_soldiers + 1  # Update grid
 
             # Add the occupied position to the set
             occupied_positions.add(position)
             generated_soldiers += 1  # Increment the count of generated soldiers
 
-        #print(self.soldiers)
-            
-        self.commander = random.choice(Defender.soldiers)
+        # Choose a random soldier to be the commander
+        #self.commander = random.choice(Defender.soldiers)
+        self.commander = random.choice(self.soldiers)
         self.commander["is_commander"] = True
-        self.commander["status"] = "Alive"
-        #print(self.commander)
-        #print(type(Defender.soldiers))
-        return Defender.soldiers       #this updated list will have 1 commmander in it
+
+        print("Commander is: Soldier ",self.commander['id'])
+
+        #return Defender.soldiers  # Return the list of soldier details
+        return self.soldiers
+
+    # Rest of the Defender class methods (simulate_battle, update_commander, etc.) remain the same
+
+    def missile_approaching(self, position, time, missile_type):
+        x, y = position
+        print(f"Missile ({missile_type}) approaching at ({y}, {x})")
+        #for soldier in Defender.soldiers:
+        for soldier in self.soldiers:
+            if soldier['status'] == 'Alive':
+                self.take_shelter(soldier, position, missile_type)
 
     def update_commander(self):
     # Check if the current commander is alive
@@ -147,24 +108,17 @@ class Defender(battle_pb2_grpc.DefenderServicer):
             return  # Commander is still alive, no need to update
 
         # Find all alive soldiers who are not the current commander
-        #alive_soldiers = [soldier for soldier in self.soldiers if soldier['status'] == 'Alive' and not soldier.get('is_commander')]
         alive_soldiers = []
-        for soldier in Defender.soldiers:
-            if soldier.status == 'Alive': #and not soldier.get('is_commander'):
+        #for soldier in Defender.soldiers:
+        for soldier in self.soldiers:
+            if soldier["status"] == 'Alive': #and not soldier.get('is_commander'):
                 alive_soldiers.append(soldier)
 
         if alive_soldiers:
             # Choose a random soldier from the alive soldiers to be the new commander
             commander = random.choice(alive_soldiers)
-            commander.is_commander= True
+            commander["is_commander"]= True
             print(f"New commander is {commander}")
-              
-    def missile_approaching(self, position, time, missile_type):
-        x, y = position     #this is the current_missile position
-        print(f"Missile ({missile_type}) approaching at ({y}, {x}) at time {time}")
-        for soldier in Defender.soldiers:
-            if soldier['status'] == 'Alive':
-                self.take_shelter(soldier, position, missile_type)
 
     def status(self, soldier_id):
         soldier = next((s for s in self.soldiers if s['id'] == soldier_id), None)
@@ -177,7 +131,8 @@ class Defender(battle_pb2_grpc.DefenderServicer):
         for soldier in self.soldiers:
             if soldier['status'] == 'Hit' or soldier['status'] == 'Deceased':
                 soldier['status'] = 'Deceased'
-                Defender.grid[soldier['y']][soldier['x']] = 0
+                #Defender.grid[soldier['y']][soldier['x']] = 0
+                self.grid[soldier['y']][soldier['x']] = 0
             else:
                 soldier['status'] = 'Alive'
                     
@@ -255,7 +210,8 @@ class Defender(battle_pb2_grpc.DefenderServicer):
             new_x = x
             new_y = y
             for soldier_possible_coord in soldier_possible_coords:
-                if(soldier_possible_coord not in impact_areas and (Defender.grid[soldier_possible_coord[1]][soldier_possible_coord[0]] == 0)):
+                #if(soldier_possible_coord not in impact_areas and (Defender.grid[soldier_possible_coord[1]][soldier_possible_coord[0]] == 0)):
+                if(soldier_possible_coord not in impact_areas and (self.grid[soldier_possible_coord[1]][soldier_possible_coord[0]] == 0)):
                     new_x = soldier_possible_coord[0]
                     new_y = soldier_possible_coord[1]
                     is_hit = False
@@ -263,8 +219,10 @@ class Defender(battle_pb2_grpc.DefenderServicer):
                 else:
                     is_hit = True
 
-            Defender.grid[y][x] = 0  # Clear old position
-            Defender.grid[new_y][new_x] = soldier['id']  # Update grid
+            #Defender.grid[y][x] = 0  # Clear old position
+            self.grid[y][x] = 0
+            #Defender.grid[new_y][new_x] = soldier['id']  # Update grid
+            self.grid[new_y][new_x] = soldier['id']
             soldier['x'], soldier['y'] = new_x, new_y
 
         #call was_hit() to update the status of the soldier
@@ -275,7 +233,7 @@ class Defender(battle_pb2_grpc.DefenderServicer):
         print(f"Time: {self.current_time}")
         
         # Print grid layout
-        for y, row in enumerate(Defender.grid):
+        for y, row in enumerate(self.grid):
             row_str = ''
             for x, cell in enumerate(row):
                 if cell == 0:
@@ -287,47 +245,38 @@ class Defender(battle_pb2_grpc.DefenderServicer):
                     row_str += f'{cell}\t'  # Soldier
             print(row_str)
         
-        
-        # Print soldier status
-        #soldier = self.status_all()
-        for soldier in Defender.soldiers:
+        #for soldier in Defender.soldiers:
+        for soldier in self.soldiers:
             print(f"Soldier {soldier['id']} - Status: {soldier['status']}")
         
-    def simulate_battle(self):
-        self.initialize_soldiers()
-        for self.current_time in range(self.T):
-            missile_type = random.choice(self.missile_types)
-            missile_x = random.randint(0, self.N - 1)
-            missile_y = random.randint(0, self.N - 1)
+    def simulate_battle(self, coord, type ):
+        #self.initialize_soldiers()
+        missile_type = type
+        missile_x = coord[0]
+        missile_y = coord[1]
+        
+        self.missile_approaching((missile_x, missile_y), self.current_time, missile_type)
+        
 
-            #impact_area_coords = self.calculate_impact_area((missile_x, missile_y), missile_type)
-            #self.print_layout(impact_area_coords)
-            
-            self.missile_approaching((missile_x, missile_y), self.current_time, missile_type)
-            
-            # Check status after missile impact
-            #statuses = self.status_all()
-            #print(statuses)
+        impact_area_coords = self.calculate_impact_area((missile_x, missile_y), missile_type)
+        
+        self.print_layout(impact_area_coords)
 
-            impact_area_coords = self.calculate_impact_area((missile_x, missile_y), missile_type)
-            
-            self.print_layout(impact_area_coords)
+        self.status_all(self.soldiers)
 
-            print(self.status_all(Defender.soldiers))
-
+        if(self.commander['status'] == 'Hit'):
             self.update_commander()
-            
-            # Check battle outcome
-            casualty_count = self.M - len([s for s in Defender.soldiers if s['status'] == 'Alive'])
-            if casualty_count > self.M / 2:
-                print("Battle lost!")
-                break
-        else:
-            print("Battle won.")
+        
+        # Check battle outcome
+        self.casualty_count = self.M - len([s for s in self.soldiers if s['status'] == 'Alive'])
+        print("Casualty count: " , self.casualty_count)
+        print("Total", self.M)
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    battle_pb2_grpc.add_DefenderServicer_to_server(Defender(0, 0, 0, 0, "", 0, 0), server)
+    N = int(input("Enter battle field dimension: "))
+    T = int(input("Total duration: "))
+    battle_pb2_grpc.add_DefenderServicer_to_server(Defender(N, T), server)
     server.add_insecure_port('[::]:50051')
     server.start()
     print("Server started and listening on port 50051")

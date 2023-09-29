@@ -25,8 +25,4 @@ Step 1: In command line navigate to the folder (WarRPC) and then run below comma
 Step 2: Give user inputs as required
 
 
-
-Generated Output.log file
-Print informative
-messages when a commander and soldier receives and sends key messages and the
-casualty count
+Generated Output is in output_defender.log and output_attacker.log
