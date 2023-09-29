@@ -1,3 +1,7 @@
-myvenv
-__pycache__
-trash
+# Ignore the virtual environment
+/myvenv/
+
+# Ignore Python's __pycache__ directories and compiled bytecode
+__pycache__/
+*.pyc
+*.pyo

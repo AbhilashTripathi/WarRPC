@@ -11,10 +11,9 @@ from google.protobuf.internal import builder as _builder
 _sym_db = _symbol_database.Default()
 
 
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x62\x61ttle.proto\x1a\x1bgoogle/protobuf/empty.proto\"Y\n\x13MissileNotification\x12\x12\n\nposition_x\x18\x01 \x01(\x05\x12\x12\n\nposition_y\x18\x02 \x01(\x05\x12\x0c\n\x04time\x18\x03 \x01(\x05\x12\x0c\n\x04type\x18\x04 \x01(\t\"#\n\rStatusRequest\x12\x12\n\nsoldier_id\x18\x01 \x01(\x05\"!\n\x0eStatusResponse\x12\x0f\n\x07was_hit\x18\x01 \x01(\x08\"=\n\x11StatusAllResponse\x12(\n\x10soldier_statuses\x18\x01 \x03(\x0b\x32\x0e.SoldierStatus\"4\n\rSoldierStatus\x12\x12\n\nsoldier_id\x18\x01 \x01(\x05\x12\x0f\n\x07was_hit\x18\x02 \x01(\x08\"6\n\rWasHitRequest\x12\x12\n\nsoldier_id\x18\x01 \x01(\x05\x12\x11\n\ttrue_flag\x18\x02 \x01(\x08\"(\n\x12TakeShelterRequest\x12\x12\n\nsoldier_id\x18\x01 \x01(\x05\x32\xa5\x02\n\rBattleService\x12\x42\n\x12MissileApproaching\x12\x14.MissileNotification\x1a\x16.google.protobuf.Empty\x12)\n\x06Status\x12\x0e.StatusRequest\x1a\x0f.StatusResponse\x12\x37\n\tStatusAll\x12\x16.google.protobuf.Empty\x1a\x12.StatusAllResponse\x12\x30\n\x06WasHit\x12\x0e.WasHitRequest\x1a\x16.google.protobuf.Empty\x12:\n\x0bTakeShelter\x12\x13.TakeShelterRequest\x1a\x16.google.protobuf.Emptyb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x62\x61ttle.proto\"\x1f\n\x07InitReq\x12\t\n\x01N\x18\x01 \x01(\x05\x12\t\n\x01T\x18\x02 \x01(\x05\"L\n\x13MissileNotification\x12\t\n\x01t\x18\x01 \x01(\x05\x12\x14\n\x0cmissile_type\x18\x02 \x01(\t\x12\t\n\x01x\x18\x03 \x01(\x05\x12\t\n\x01y\x18\x04 \x01(\x05\"@\n\x0fTrackingDetails\x12\x16\n\x0e\x63\x61sualty_count\x18\x01 \x01(\x05\x12\x15\n\rsoldier_count\x18\x02 \x01(\x05\"f\n\rSoldierDetail\x12\n\n\x02id\x18\x01 \x01(\x05\x12\t\n\x01x\x18\x02 \x01(\x05\x12\t\n\x01y\x18\x03 \x01(\x05\x12\r\n\x05speed\x18\x04 \x01(\x05\x12\x0e\n\x06status\x18\x05 \x01(\t\x12\x14\n\x0cis_commander\x18\x06 \x01(\x08\"2\n\x0bInitDetails\x12#\n\x0bsol_details\x18\x01 \x03(\x0b\x32\x0e.SoldierDetail2v\n\x08\x44\x65\x66\x65nder\x12<\n\x12MissileApproaching\x12\x14.MissileNotification\x1a\x10.TrackingDetails\x12,\n\x12InitializeSoldiers\x12\x08.InitReq\x1a\x0c.InitDetailsb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -22,20 +21,16 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'battle_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _globals['_MISSILENOTIFICATION']._serialized_start=45
-  _globals['_MISSILENOTIFICATION']._serialized_end=134
-  _globals['_STATUSREQUEST']._serialized_start=136
-  _globals['_STATUSREQUEST']._serialized_end=171
-  _globals['_STATUSRESPONSE']._serialized_start=173
-  _globals['_STATUSRESPONSE']._serialized_end=206
-  _globals['_STATUSALLRESPONSE']._serialized_start=208
-  _globals['_STATUSALLRESPONSE']._serialized_end=269
-  _globals['_SOLDIERSTATUS']._serialized_start=271
-  _globals['_SOLDIERSTATUS']._serialized_end=323
-  _globals['_WASHITREQUEST']._serialized_start=325
-  _globals['_WASHITREQUEST']._serialized_end=379
-  _globals['_TAKESHELTERREQUEST']._serialized_start=381
-  _globals['_TAKESHELTERREQUEST']._serialized_end=421
-  _globals['_BATTLESERVICE']._serialized_start=424
-  _globals['_BATTLESERVICE']._serialized_end=717
+  _globals['_INITREQ']._serialized_start=16
+  _globals['_INITREQ']._serialized_end=47
+  _globals['_MISSILENOTIFICATION']._serialized_start=49
+  _globals['_MISSILENOTIFICATION']._serialized_end=125
+  _globals['_TRACKINGDETAILS']._serialized_start=127
+  _globals['_TRACKINGDETAILS']._serialized_end=191
+  _globals['_SOLDIERDETAIL']._serialized_start=193
+  _globals['_SOLDIERDETAIL']._serialized_end=295
+  _globals['_INITDETAILS']._serialized_start=297
+  _globals['_INITDETAILS']._serialized_end=347
+  _globals['_DEFENDER']._serialized_start=349
+  _globals['_DEFENDER']._serialized_end=467
 # @@protoc_insertion_point(module_scope)

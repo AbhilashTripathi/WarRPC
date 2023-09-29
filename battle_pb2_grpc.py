@@ -3,10 +3,9 @@
 import grpc
 
 import battle_pb2 as battle__pb2
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
-class BattleServiceStub(object):
+class DefenderStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -16,33 +15,18 @@ class BattleServiceStub(object):
             channel: A grpc.Channel.
         """
         self.MissileApproaching = channel.unary_unary(
-                '/BattleService/MissileApproaching',
+                '/Defender/MissileApproaching',
                 request_serializer=battle__pb2.MissileNotification.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                response_deserializer=battle__pb2.TrackingDetails.FromString,
                 )
-        self.Status = channel.unary_unary(
-                '/BattleService/Status',
-                request_serializer=battle__pb2.StatusRequest.SerializeToString,
-                response_deserializer=battle__pb2.StatusResponse.FromString,
-                )
-        self.StatusAll = channel.unary_unary(
-                '/BattleService/StatusAll',
-                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-                response_deserializer=battle__pb2.StatusAllResponse.FromString,
-                )
-        self.WasHit = channel.unary_unary(
-                '/BattleService/WasHit',
-                request_serializer=battle__pb2.WasHitRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-                )
-        self.TakeShelter = channel.unary_unary(
-                '/BattleService/TakeShelter',
-                request_serializer=battle__pb2.TakeShelterRequest.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+        self.InitializeSoldiers = channel.unary_unary(
+                '/Defender/InitializeSoldiers',
+                request_serializer=battle__pb2.InitReq.SerializeToString,
+                response_deserializer=battle__pb2.InitDetails.FromString,
                 )
 
 
-class BattleServiceServicer(object):
+class DefenderServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def MissileApproaching(self, request, context):
@@ -52,70 +36,34 @@ class BattleServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def Status(self, request, context):
-        """Query the status of a specific soldier.
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def StatusAll(self, request, context):
-        """Query the status of all soldiers.
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def WasHit(self, request, context):
-        """Notify a soldier whether they were hit by a missile.
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def TakeShelter(self, request, context):
-        """Request a soldier to take shelter (move to a safe location).
+    def InitializeSoldiers(self, request, context):
+        """Query soldier details to keep track of .
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_BattleServiceServicer_to_server(servicer, server):
+def add_DefenderServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'MissileApproaching': grpc.unary_unary_rpc_method_handler(
                     servicer.MissileApproaching,
                     request_deserializer=battle__pb2.MissileNotification.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    response_serializer=battle__pb2.TrackingDetails.SerializeToString,
             ),
-            'Status': grpc.unary_unary_rpc_method_handler(
-                    servicer.Status,
-                    request_deserializer=battle__pb2.StatusRequest.FromString,
-                    response_serializer=battle__pb2.StatusResponse.SerializeToString,
-            ),
-            'StatusAll': grpc.unary_unary_rpc_method_handler(
-                    servicer.StatusAll,
-                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-                    response_serializer=battle__pb2.StatusAllResponse.SerializeToString,
-            ),
-            'WasHit': grpc.unary_unary_rpc_method_handler(
-                    servicer.WasHit,
-                    request_deserializer=battle__pb2.WasHitRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-            ),
-            'TakeShelter': grpc.unary_unary_rpc_method_handler(
-                    servicer.TakeShelter,
-                    request_deserializer=battle__pb2.TakeShelterRequest.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            'InitializeSoldiers': grpc.unary_unary_rpc_method_handler(
+                    servicer.InitializeSoldiers,
+                    request_deserializer=battle__pb2.InitReq.FromString,
+                    response_serializer=battle__pb2.InitDetails.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'BattleService', rpc_method_handlers)
+            'Defender', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class BattleService(object):
+class Defender(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
@@ -129,14 +77,14 @@ class BattleService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/BattleService/MissileApproaching',
+        return grpc.experimental.unary_unary(request, target, '/Defender/MissileApproaching',
             battle__pb2.MissileNotification.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            battle__pb2.TrackingDetails.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def Status(request,
+    def InitializeSoldiers(request,
             target,
             options=(),
             channel_credentials=None,
@@ -146,59 +94,8 @@ class BattleService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/BattleService/Status',
-            battle__pb2.StatusRequest.SerializeToString,
-            battle__pb2.StatusResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def StatusAll(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/BattleService/StatusAll',
-            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-            battle__pb2.StatusAllResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def WasHit(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/BattleService/WasHit',
-            battle__pb2.WasHitRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def TakeShelter(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/BattleService/TakeShelter',
-            battle__pb2.TakeShelterRequest.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+        return grpc.experimental.unary_unary(request, target, '/Defender/InitializeSoldiers',
+            battle__pb2.InitReq.SerializeToString,
+            battle__pb2.InitDetails.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
